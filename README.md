@@ -1,4 +1,4 @@
-# Mariano's API RESTful (0.4)
+# Mariano's API RESTful (0.6)
 
 This API RESTful let's you to get all the info existent in the menu. If you got permissions, it let's you to add, remove and update any existing items.
 
@@ -14,10 +14,13 @@ git pull origin master
 ```
 
 ## Next features
-* Save the information in a DB
 * Endpoint to show all the dishes of a type
 * Move things to modules/resources
 * Simplify code
+
+# New features
+* Information saved now in a local DB (sqlite)
+* Create new users
 
 ## Finality
 
