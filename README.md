@@ -10,10 +10,10 @@ This API RESTful let's you to get all the info existent in the menu. If you got 
 Just pull it as usual:
 
 ```bash
-git pull origin master
+git clone git@github.com:david1707/first-own-api-rest.git
 ```
 
-## Next features
+# Next features
 * Endpoint to show all the dishes of a type
 * Move things to modules/resources
 * Simplify code
@@ -22,7 +22,7 @@ git pull origin master
 * Information saved now in a local DB (sqlite)
 * Create new users
 
-## Finality
+# API's purpose
 
 This API was built just for learning purposes and to pay homage to the restaurant in Benidorm, Mariano's
 
