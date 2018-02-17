@@ -2,6 +2,8 @@ import sqlite3
 from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
 
+from models.dish import DishModel
+
 
 class Dish(Resource):
     parser = reqparse.RequestParser()
@@ -19,26 +21,26 @@ class Dish(Resource):
                         help="Type field can not be left blank")
 
     def get(self, dish_id):
-        dish = self.find_by_id(dish_id)
+        dish = DishModel.find_by_id(dish_id)
 
         if dish:
-            return dish
+            return dish.json()
         return {'message': "Dish not found"}, 404
 
     # @jwt_required()  # Requires to identify before doing this step
     def post(self, dish_id):
-        if self.find_by_id(dish_id):
+        if DishModel.find_by_id(dish_id):
             return {'message': "A dish with id {} already exists".format(dish_id)}
 
         data = Dish.parser.parse_args()
 
-        dish = {'dish_id': dish_id, 'name': data['name'], "price": data['price'], "type": data['type']}
+        dish = DishModel(dish_id,data['name'], data['price'], data['type'])
 
         try:
-            self.insert(dish)
+            DishModel.insert()
         except:
             return {'message': "An error occurred inserting the item."}, 500
-        return dish, 201
+        return dish.json(), 201
 
     # @jwt_required()
     def delete(self, dish_id):
@@ -56,54 +58,20 @@ class Dish(Resource):
     def put(self, dish_id):
         data = Dish.parser.parse_args()
 
-        dish = self.find_by_id(dish_id)
-        updated_dish = {'dish_id': dish_id, 'name': data['name'], "price": data['price'], "type": data['type']}
+        dish = DishModel.find_by_id(dish_id)
+        updated_dish = DishModel(dish_id, data['name'], data['price'], data['type'])
 
         if dish is None:
             try:
-                self.insert(updated_dish)
+                updated_dish.insert()
             except:
                 return {'message': "An error occurred inserting the item."}, 500
         else:
             try:
-                self.update(updated_dish)
+                updated_dish.update()
             except:
                 return {'message': "An error occurred updating the item."}, 500
-        return updated_dish
-
-    @classmethod
-    def find_by_id(cls, dish_id):
-        connection = sqlite3.connect('marianos.db')
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM dishes WHERE id=?"
-        row = cursor.execute(query, (dish_id,)).fetchone()
-
-        connection.close()
-        if row:
-            return {'item': {'dish id': row[0], 'name': row[1], 'price': row[2], 'type': row[3]}}
-
-    @classmethod
-    def insert(cls, dish):
-        connection = sqlite3.connect('marianos.db')
-        cursor = connection.cursor()
-
-        query = "INSERT INTO dishes VALUES (?, ?, ?, ?)"
-        cursor.execute(query, (dish['dish_id'], dish['name'], dish['price'], dish['type']))
-
-        connection.commit()
-        connection.close()
-
-    @classmethod
-    def update(cls, dish):
-        connection = sqlite3.connect('marianos.db')
-        cursor = connection.cursor()
-
-        query = "UPDATE dishes SET name=?, price=?, type=? WHERE id=?"
-        cursor.execute(query, (dish['name'], dish['price'], dish['type'], dish['dish_id']))
-
-        connection.commit()
-        connection.close()
+        return updated_dish.json()
 
 
 class DishList(Resource):

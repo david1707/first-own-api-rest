@@ -15,12 +15,12 @@ git clone git@github.com:david1707/first-own-api-rest.git
 
 # Next features
 * Endpoint to show all the dishes of a type
-* Move things to modules/resources
 * Simplify code
 
 # New features
 * Information saved now in a local DB (sqlite)
 * Create new users
+* Move things to modules/resources
 
 # API's purpose
 
