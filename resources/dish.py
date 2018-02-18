@@ -15,11 +15,12 @@ class Dish(Resource):
                         type=float,
                         required=True,
                         help="Price field can not be left blank")
-    parser.add_argument('type',
+    parser.add_argument('dish_type',
                         type=str,
                         required=True,
                         help="Type field can not be left blank")
 
+    @jwt_required()  # Requires to identify before doing this step
     def get(self, dish_id):
         dish = DishModel.find_by_id(dish_id)
 
@@ -27,64 +28,45 @@ class Dish(Resource):
             return dish.json()
         return {'message': "Dish not found"}, 404
 
-    # @jwt_required()  # Requires to identify before doing this step
+    # @jwt_required()
     def post(self, dish_id):
         if DishModel.find_by_id(dish_id):
             return {'message': "A dish with id {} already exists".format(dish_id)}
 
         data = Dish.parser.parse_args()
-
-        dish = DishModel(dish_id,data['name'], data['price'], data['type'])
+        dish = DishModel(dish_id, **data)
 
         try:
-            DishModel.insert()
+            dish.save_to_db()
+
         except:
             return {'message': "An error occurred inserting the item."}, 500
         return dish.json(), 201
 
-    # @jwt_required()
+    @jwt_required()
     def delete(self, dish_id):
-        connection = sqlite3.connect('marianos.db')
-        cursor = connection.cursor()
+        dish = DishModel.find_by_id(dish_id)
 
-        query = "DELETE FROM dishes WHERE id=?"
-        cursor.execute(query, (dish_id,))
+        if dish:
+            dish.delete_from_db()
+            return {'message': 'Item deleted'}
 
-        connection.commit()
-        connection.close()
-        return {'message': "Item deleted"}, 202
-
-    # @jwt_required()
+    @jwt_required()
     def put(self, dish_id):
         data = Dish.parser.parse_args()
-
         dish = DishModel.find_by_id(dish_id)
-        updated_dish = DishModel(dish_id, data['name'], data['price'], data['type'])
 
         if dish is None:
-            try:
-                updated_dish.insert()
-            except:
-                return {'message': "An error occurred inserting the item."}, 500
+            dish = DishModel(dish_id, **data)
         else:
-            try:
-                updated_dish.update()
-            except:
-                return {'message': "An error occurred updating the item."}, 500
-        return updated_dish.json()
+            dish.name = data['name']
+            dish.price = data['price']
+            dish.dish_type = data['dish_type']
+
+        dish.save_to_db()
+        return dish.json()
 
 
 class DishList(Resource):
     def get(self):
-        connection = sqlite3.connect('marianos.db')
-        cursor = connection.cursor()
-
-        query = "SELECT * FROM dishes"
-        result = cursor.execute(query)
-        dishes = []
-
-        for dish in result:
-            dishes.append({'dish id': dish[0], 'name': dish[1], 'price': dish[2], 'type': dish[3]})
-
-        connection.close()
-        return {'dishes': dishes}
+        return {'items': [dish.json() for dish in DishModel.query.all()]}

@@ -2,7 +2,7 @@ from werkzeug.security import  safe_str_cmp
 from models.user import UserModel
 
 users = [
-    UserModel(1, 'admin', 'admin')
+    UserModel('admin', 'admin')
 ]
 
 
